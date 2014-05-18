@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link href='../vidplayer/vidstyle.css' rel='stylesheet'>
-<link href='../vidplayer/video-js.css' rel='stylesheet'>
+<link href='vidplayer/vidstyle.css' rel='stylesheet'>
+<link href='vidplayer/video-js.css' rel='stylesheet'>
 
-<script src='../vidplayer/jquery.min.js'></script>
-<script src='../vidplayer/video.js'></script>
-<script src='../vidplayer/playlist.min.js'></script>
+<script src='vidplayer/jquery.min.js'></script>
+<script src='vidplayer/video.js'></script>
+<script src='vidplayer/playlist.min.js'></script>
 
 <title>Trainingvideo ${model.getVak().getNaam()}</title>
 </head>

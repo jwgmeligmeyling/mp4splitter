@@ -97,12 +97,8 @@ public final class Split {
 			public File call() throws FileNotFoundException, IOException {
 				log.info("Start converting file {}", mediaFile);
 		        Container out = new DefaultMp4Builder().build(movie);
-				String path = String.format("%s%s%s-%s.mp4",
-						mediaFile.getFile().getParent(),
-						File.separator,
-						mediaFile.getFileNameWithoutExtension(),
-						System.currentTimeMillis());
-				File destination = new File(path);
+				String name = String.format("%s-%s.mp4", mediaFile.getFileNameWithoutExtension(), System.currentTimeMillis());
+				File destination = new File(mediaFile.getFile().getParent(), name);
 				if(destination.exists())
 					throw new FileAlreadyExistsException(destination.toString() + " already exists!");
 				else

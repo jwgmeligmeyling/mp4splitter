@@ -1,9 +1,13 @@
 package nl.sslleiden.model;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.Writer;
 import java.text.ParseException;
@@ -13,6 +17,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -139,28 +145,20 @@ public class CourseModel implements Serializable {
 	}
 	
 	/**
-	 * Export the model to a file
-	 * @return created file
-	 * @throws IOException
-	 */
-	public File saveToFile() throws IOException {
-		File file = new File(rootFolder.getPath() + "/output.txt");
-		if(!file.exists())
-			file.createNewFile();
-		saveToFile(file);
-		return file;
-	}
-	
-	/**
 	 * Generate sources
 	 * @return
 	 * @throws IOException
 	 * @throws TemplateException
 	 */
 	public File generateSources() throws IOException, TemplateException {
-		File file = new File(rootFolder.getPath() + "/index.html");
+		File file = new File(rootFolder, "index.html");
 		if(!file.exists())
 			file.createNewFile();
+		
+		File destination = new File(rootFolder, "vidplayer");
+		if(!destination.exists())
+			destination.mkdir();
+		copyFolder(getResource("/vidplayer"), destination);
 		
 		Configuration configuration = new Configuration();
 		configuration.setClassForTemplateLoading(this.getClass(), "/");
@@ -174,6 +172,56 @@ public class CourseModel implements Serializable {
 		return file;
 	}
 	
+	/**
+	 * @param path
+	 * @return get a resource File
+	 */
+	private File getResource(String path) {
+		return new File(this.getClass().getResource(path).getPath());
+	}
+	
+	/**
+	 * Copy the dependencies to the right folder
+	 * @param source
+	 * @param destination
+	 * @throws IOException
+	 */
+	private void copyFolder(File source, File destination) throws IOException {
+		if(source.isDirectory()){
+    		if(!destination.exists())
+    			destination.mkdir();
+    		//list all the directory contents
+    		String files[] = source.list();
+    		for (String file : files) {
+    		   //construct the src and dest file structure
+    		   File srcFile = new File(source, file);
+    		   File destFile = new File(destination, file);
+    		   //recursive copy
+    		   copyFolder(srcFile,destFile);
+    		}
+    	} else {
+    		//if file, then copy it
+    		//Use bytes stream to support all file types
+    		try(InputStream in = new FileInputStream(source);
+    	        OutputStream out = new FileOutputStream(destination);) {
+    			IOUtils.copy(in, out);
+    		}
+    	}
+	}
+	
+	/**
+	 * Export the model to a file
+	 * @return created file
+	 * @throws IOException
+	 */
+	public File saveToFile() throws IOException {
+		File file = new File(rootFolder.getPath() + "/output.txt");
+		if(!file.exists())
+			file.createNewFile();
+		saveToFile(file);
+		return file;
+	}
+
 	/**
 	 * Export the model to a file
 	 * @param file
