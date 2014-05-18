@@ -1,0 +1,159 @@
+/*@font-face {*/
+    /*font-family: Lato;*/
+    /*src: url('./fonts/Lato-Regular.ttf');*/
+/*}*/
+
+/*@font-face {*/
+    /*font-family: Lato Italic;*/
+    /*src: url('./fonts/Lato-Italic.ttf');*/
+/*}*/
+
+/*@font-face {*/
+    /*font-family: Lato Bold;*/
+    /*src: url('./fonts/Lato-Bold.ttf');*/
+/*}*/
+
+* html { overflow-y: scroll; }
+
+body {
+	background: #444 url(./images/bg.jpg) repeat 0 0 scroll;
+}
+
+a {
+	color: #efefef;
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .8);
+	font-family: 'Lato Bold', arial, sans-serif;
+	font-weight: bold;
+	font-size: 14px;
+}
+
+#back_button {
+	position: absolute;
+	left: 0%;
+}
+
+div.vidpage_header h1 {
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .8);
+	font-family: 'Lato Bold', arial, sans-serif;
+	font-weight: bold;
+	font-size: 14px;
+	color: #efefef;
+	vertical-align: center;
+	text-align: center;
+	margin: 20px auto;
+}
+
+#wrapper {
+	position: relative;
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+}
+
+#vidpage_header {
+	position: relative;
+	top: 30px;
+	left: 0px;
+	overflow: hidden;
+}
+
+#vidpage_footer {
+	bottom: 0px;
+	height: 50px;
+	left: 0px;
+	overflow: hidden;
+}
+
+#omschrijving {
+	margin: 0px auto 10px auto;
+	padding: 0px 10px;
+	color: #999;
+	font-size: 16px;
+	text-align: center;
+	overflow: auto;
+}
+	
+#content {
+	position: relative;
+	top: 50px;
+	bottom: 50px;
+	left: 0px;
+	overflow: auto;
+	display: table-cell;
+	vertical-align: middle;
+}
+
+#kijkVideo {
+	margin: 40px auto 40px auto;
+	width: 960px;
+	height: 540px;
+	padding: 10px 20px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+	background: transparent url(./images/player-bg.png) repeat 0 0 scroll;
+}
+
+#videoPlaylist {
+	width: 720px;
+	margin: 30px auto 30px auto;
+	padding: 10px 20px;
+	background: transparent url (./images/tracklist-bg.png) repeat 0 0 scroll;
+	overflow: auto;
+/*	list-style-type: none; */
+	color: #999;
+	font-size: 12px;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, .15), 0 1px 0 rgba(255, 255, 255, .04);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .15), 0 1px 0 rgba(255, 255, 255, .04);
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .15), 0 1px 0 rgba(255, 255, 255, .04);
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	-webkit-border-radius: 6px;
+}	
+
+.vid_element {
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .6);
+	background: transparent url(./images/tracklist-item-bg.png) repeat-x bottom left scroll;
+	padding: 10px 0 10px 0;
+	list-style-position: inside;
+	position: relative;
+	font-family: 'Lato Bold', arial, sans-serif;
+	font-size: 13px;
+}
+	
+.vid_element:hover {
+	color: #eee;
+	cursor: hand;
+}
+
+.subonderdeel {
+	text-shadow: 0 1px 1px rgba(0, 0, 0, .6);
+	background: transparent url(./images/tracklist-item-bg.png) repeat-x bottom left scroll;
+	padding: 10px 0 10px 0;
+	list-style-position: inside;
+	position: relative;
+	font-family: 'Lato Bold', arial, sans-serif;
+	font-size: 12px;
+}
+
+.subonderdeel:hover {
+	color: #eee;
+	cursor: hand;
+}
+
+.current {
+	color: #fff !important;
+}
+
+.videoPlaylist li:last-child {
+    background: none;
+}
+
+.subonderdelen {
+	list-style-type: lower-alpha;
+}
+
+.subonderdelen li:last-child {
+    background: none;
+}
+
