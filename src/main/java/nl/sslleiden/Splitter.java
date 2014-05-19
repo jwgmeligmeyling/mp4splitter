@@ -48,6 +48,11 @@ import nl.sslleiden.swing.Column;
 import nl.sslleiden.swing.ComboBox;
 import nl.sslleiden.swing.CustomTableModel;
 import nl.sslleiden.swing.TextBox;
+import nl.sslleiden.swing.OptionDialog;
+import nl.sslleiden.swing.OptionDialog.OptionType;
+import nl.sslleiden.swing.OptionDialog.MessageType;
+import nl.sslleiden.util.Callback;
+import nl.sslleiden.util.Proposal;
 import nl.youngmediaexperts.data.Marker;
 import nl.youngmediaexperts.data.Timestamp;
 
@@ -169,6 +174,37 @@ public class Splitter extends JPanel {
 					JOptionPane.showMessageDialog(null, properties.getProperty("FAILED_TO_SAVE"));
 					log.error(exception.getMessage(), exception);
 				}
+			}
+			
+		}));
+		
+		menu.add(new JMenuItem(new AbstractAction(properties.getProperty("CLEAN_FOLDER", "Clean up folder")) {
+			
+			private static final long serialVersionUID = -3380026829503854463L;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				model.cleanUpRoot(new Callback<Proposal<List<File>>>() {
+
+					@Override
+					public void call(Proposal<List<File>> proposal) {
+						
+						String CRLF = System.lineSeparator();
+						List<File> files = proposal.get();
+						StringBuilder sb = new StringBuilder(files.size()*10);
+						sb.append(properties.getProperty("DELETE_FILES_Q", "Do you want to delete the following files?")).append(CRLF);
+						for(File file : files)
+							sb.append(file.getName()).append(CRLF);
+						
+						OptionDialog.builder(frame, proposal)
+							.setMessage(sb.toString())
+							.setOptionType(OptionType.YES_NO_OPTION)
+							.setMessageType(MessageType.WARNING_MESSAGE)
+							.show();
+						
+					}
+					
+				});
 			}
 			
 		}));

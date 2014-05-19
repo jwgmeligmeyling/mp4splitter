@@ -20,12 +20,16 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import nl.sslleiden.util.AbstractProposal;
+import nl.sslleiden.util.Callback;
+import nl.sslleiden.util.Proposal;
 import nl.youngmediaexperts.data.Marker;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -253,6 +257,49 @@ public class CourseModel implements Serializable {
 			
 			writer.flush();
 		}
+	}
+	
+	/**
+	 * Clean up the root directory for this {@code CourseModel}
+	 */
+	public void cleanUpRoot(Callback<Proposal<List<File>>> callback) {
+		callback.call(new AbstractProposal<List<File>>() {
+			
+			private final List<File> toBeRemoved = getFilesToBeRemoved();
+			
+			private List<File> getFilesToBeRemoved() {
+				ImmutableList.Builder<File> builder = ImmutableList.<File> builder();
+				if(rootFolder != null && rootFolder.isDirectory()) {
+					FILES : for(File file : rootFolder.listFiles()) {
+						for(MediaFile media : files) {
+							if(file.equals(media.getFile())) {
+								continue FILES;
+							}
+						}
+						builder.add(file);
+					}
+				}
+				return builder.build();
+			}
+
+			@Override
+			public List<File> get() {
+				return toBeRemoved;
+			}
+
+			@Override
+			public void accept() {
+				for(File file : toBeRemoved) {
+					file.delete();
+				}
+			}
+
+			@Override
+			public void decline() {
+				// Nothing happens, no files to be removed
+			}
+			
+		});
 	}
 	
 }
