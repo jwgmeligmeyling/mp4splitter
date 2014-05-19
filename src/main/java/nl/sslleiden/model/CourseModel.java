@@ -293,11 +293,6 @@ public class CourseModel implements Serializable {
 					file.delete();
 				}
 			}
-
-			@Override
-			public void decline() {
-				// Nothing happens, no files to be removed
-			}
 			
 		});
 	}
