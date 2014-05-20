@@ -94,31 +94,40 @@ public class CourseModel implements Serializable {
 	private void scanFile(File file) throws FileNotFoundException, ParseException {
 		try(Scanner scanner = new Scanner(file)) {
 			this.rootFolder = file.getParentFile();
-			this.files = Lists.newArrayList();
-			scanner.next();
-			this.vak = Vak.getCourseForStr(scanner.next().concat(scanner.nextLine()));
-			this.cursus = Cursus.getTypeForStr(scanner.next());
-			this.jaartal = scanner.nextInt();
-			skip(scanner, "-");
-			skip(scanner, "Periode");
-			this.periode = 1;
-			
-			try {
-				this.periode = Integer.parseInt(scanner.next());
-			} catch ( NumberFormatException e ) {
-				log.info("Failed to pase integer, using 1 instead", e);
-			}
-			
-			this.niveau = Niveau.getLevelForStr(scanner.next());
-			scanner.next().concat(scanner.nextLine());
-			this.docent = scanner.next().concat(scanner.nextLine());
-			
-			while(scanner.hasNext()) {
-				if(scanner.hasNext(Pattern.compile(".+"))) {
-					this.addMediaFile(new MediaFile(this, scanner));
-				} else {
-					scanner.next();
-				}
+			read(scanner);
+		}
+	}
+	
+	/**
+	 * Read data for this {@code CourseModel} from a {@code Scanner}
+	 * @param scanner
+	 * @throws ParseException
+	 */
+	public void read(Scanner scanner) throws ParseException {
+		this.files = Lists.newArrayList();
+		scanner.next();
+		this.vak = Vak.getCourseForStr(scanner.next().concat(scanner.nextLine()));
+		this.cursus = Cursus.getTypeForStr(scanner.next());
+		this.jaartal = scanner.nextInt();
+		skip(scanner, "-");
+		skip(scanner, "Periode");
+		this.periode = 1;
+		
+		try {
+			this.periode = Integer.parseInt(scanner.next());
+		} catch ( NumberFormatException e ) {
+			log.info("Failed to pase integer, using 1 instead", e);
+		}
+		
+		this.niveau = Niveau.getLevelForStr(scanner.next());
+		scanner.next().concat(scanner.nextLine());
+		this.docent = scanner.next().concat(scanner.nextLine());
+		
+		while(scanner.hasNext()) {
+			if(scanner.hasNext(Pattern.compile(".+"))) {
+				this.addMediaFile(new MediaFile(this, scanner));
+			} else {
+				scanner.next();
 			}
 		}
 	}
