@@ -333,20 +333,20 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 				@Override
 				public void onSuccess(File result) {
 					MediaFile.this.setFile(result);
+					Timestamp inpoint = MediaFile.this.getInpoint();
 					
 					// Update the markers
-					Timestamp difference = MediaFile.this.getInpoint();
 					List<Marker> oldMarkers = Lists.newArrayList(MediaFile.this.getMarkers());
 					MediaFile.this.clearMarkers();
 					for(Marker marker : oldMarkers) {
-						MediaFile.this.addMarker(marker.subtract(difference));
+						MediaFile.this.addMarker(marker.subtract(inpoint));
 					}
 					
 					// Update in and out points
-					Timestamp outpoint = MediaFile.this.getOutpoint().subtract(difference); 
+					Timestamp outpoint = MediaFile.this.getOutpoint().subtract(inpoint); 
 					MediaFile.this.setOutpoint(outpoint);
 					MediaFile.this.setInpoint(new Timestamp(0,0,0));
-					MediaFile.this.setDuration(new Duration(MediaFile.this.getOutpoint().subtract(difference)));
+					MediaFile.this.setDuration(new Duration(outpoint));
 					
 					// Run the callback
 					callback.onSuccess(MediaFile.this);
