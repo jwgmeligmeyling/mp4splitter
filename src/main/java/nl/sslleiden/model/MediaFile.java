@@ -244,6 +244,8 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		copy.index = this.index;
 		copy.creation = this.creation;
 		copy.markers = Lists.newArrayList(this.markers);
+		copy.inpoint = this.inpoint;
+		copy.outpoint = this.outpoint;
 		copy.duration = this.duration;
 		return copy;
 	} 

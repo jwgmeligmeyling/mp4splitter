@@ -819,23 +819,23 @@ public class Splitter extends JPanel {
 	/**
 	 * Update the File table
 	 */
-    public void updateFileTable() {
+	public void updateFileTable() {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				fileTable.updateUI();
 			}
 		});
-    }
-    
-    /**
-     * Update the Marker table
-     */
-    public void updateMarkerTable() {
-    	SwingUtilities.invokeLater(new Runnable() {
+	}
+
+	/**
+	 * Update the Marker table
+	 */
+	public void updateMarkerTable() {
+		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				markerTable.updateUI();
 			}
 		});
-    }
+	}
 
 }
