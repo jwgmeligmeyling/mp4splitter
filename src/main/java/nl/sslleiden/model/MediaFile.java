@@ -141,7 +141,10 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 			this.creation = dateFormat.parse(dateString);
 		} else {
 			// Prevent null pointers exception, fill with a date
-			this.creation = new Date(file.lastModified());
+			try {
+				this.index = Integer.parseInt(name.substring(0,2));
+			} catch (NumberFormatException e)
+				{};
 		}
 	}
 	
@@ -164,12 +167,12 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	@Override
 	public int compareTo(MediaFile o) {
 		int cmp = 0;
-		if(creation != null && o.creation != null) {
+		if(creation != null && o.creation != null)
 			cmp = (int) (creation.getTime() - o.creation.getTime());
-		}
-		if(cmp == 0) {
+		if(cmp == 0)
+			cmp = index - o.index;
+		if(cmp == 0)
 			cmp = getFileName().compareTo(o.getFileName());
-		}
 		return cmp;
 	}
 
@@ -259,6 +262,10 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	public boolean isTrimmable() {
 		return !(this.getInpoint().equals(new Timestamp(0,0,0)) &&
 				this.getOutpoint().equals(this.getDuration()));
+	}
+	
+	public Date getCreation() {
+		return creation == null ? new Date(file.lastModified()) : creation;
 	}
 	
 	/**
