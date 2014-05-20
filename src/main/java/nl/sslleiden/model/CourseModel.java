@@ -109,7 +109,7 @@ public class CourseModel implements Serializable {
 				log.info("Failed to pase integer, using 1 instead", e);
 			}
 			
-			this.niveau = Niveau.valueOf(scanner.next());
+			this.niveau = Niveau.getLevelForStr(scanner.next());
 			scanner.next().concat(scanner.nextLine());
 			this.docent = scanner.next().concat(scanner.nextLine());
 			

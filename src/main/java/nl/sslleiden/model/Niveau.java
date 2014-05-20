@@ -23,4 +23,13 @@ public enum Niveau {
 		return omschrijving;
 	}
 	
+	public static Niveau getLevelForStr(String value) {
+		for(Niveau niveau : Niveau.values()) {
+			if(niveau.omschrijving.equalsIgnoreCase(value)) {
+				return niveau;
+			}
+		}
+		return Niveau.ONBEKEND;
+	}
+	
 }

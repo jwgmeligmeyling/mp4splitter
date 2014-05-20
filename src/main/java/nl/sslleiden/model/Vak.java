@@ -38,6 +38,6 @@ public enum Vak {
 				return vak;
 			}
 		}
-		return null;
+		return Vak.OVERIG;
 	}
 }

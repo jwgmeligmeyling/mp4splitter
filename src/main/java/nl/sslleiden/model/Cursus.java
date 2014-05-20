@@ -32,6 +32,6 @@ public enum Cursus {
 				return cursus;
 			}
 		}
-		return null;
+		return Cursus.OVERIG;
 	}
 }
