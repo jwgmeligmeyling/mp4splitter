@@ -31,7 +31,16 @@ public final class Split {
 
 	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 	
-	public static void split(final MediaFile mediaFile, final FutureCallback<File> callback) throws FileNotFoundException, IOException {
+	/**
+	 * Trim a {@code MediaFile} to it's in and out points and write the result
+	 * to a new file
+	 * 
+	 * @param mediaFile {@code MediaFile} to trim
+	 * @param callback success and exception handling
+	 * @throws FileNotFoundException when the {@code File} could not be found
+	 * @throws IOException when an {@code IOException} occurred
+	 */
+	public static void trim(final MediaFile mediaFile, final FutureCallback<File> callback) throws FileNotFoundException, IOException {
 		final DataSource source = new FileDataSourceImpl(mediaFile.getFile());
 		final Movie movie = MovieCreator.build(source);
 		List<Track> tracks = movie.getTracks();
@@ -125,8 +134,7 @@ public final class Split {
 		});
 	}
 
-	private static double correctTimeToSyncSample(Track track, double cutHere,
-			boolean next) {
+	private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
 		double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
 		long currentSample = 0;
 		double currentTime = 0;
@@ -134,10 +142,8 @@ public final class Split {
 			long delta = track.getSampleDurations()[i];
 
 			if (Arrays.binarySearch(track.getSyncSamples(), currentSample + 1) >= 0) {
-				// samples always start with 1 but we start with zero therefore
-				// +1
-				timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(),
-						currentSample + 1)] = currentTime;
+				// samples always start with 1 but we start with zero therefore +1
+				timeOfSyncSamples[Arrays.binarySearch(track.getSyncSamples(), currentSample + 1)] = currentTime;
 			}
 			currentTime += (double) delta
 					/ (double) track.getTrackMetaData().getTimescale();

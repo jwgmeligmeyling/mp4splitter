@@ -45,10 +45,20 @@ public class Marker implements Comparable<Marker>, Serializable {
 		return timestamp.compareTo(o.timestamp);
 	}
 	
+	/**
+	 * Substract a {@code Timestamp} from this {@code Marker}
+	 * @param t
+	 * @return a copy of this {@code Marker} with the subtraction applied to it
+	 */
 	public Marker subtract(Timestamp t) {
 		return new Marker(timestamp.subtract(t), description);
 	}
 	
+	/**
+	 * Add a {@code Timestamp} from this {@code Marker}
+	 * @param t
+	 * @return a copy of this {@code Marker} with the addition applied to it
+	 */
 	public Marker add(Timestamp t) {
 		return new Marker(timestamp.add(t), description);
 	}

@@ -281,7 +281,7 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		}
 		
 		try {
-			Split.split(this, new FutureCallback<File>() {
+			Split.trim(this, new FutureCallback<File>() {
 
 				@Override
 				public void onSuccess(File result) {

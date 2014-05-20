@@ -14,6 +14,11 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
 
 	private final int hours, minutes, seconds;
 	
+	/**
+	 * Parse a {@code Timecode} from a String
+	 * @param string String in the MM:SS or HH:MM:SS format
+	 * @throws ParseException
+	 */
 	public Timestamp(String string) throws ParseException {
 		assert string != null;
 		String[] parts =
@@ -34,19 +39,32 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
 			throw new ParseException(e.getMessage(), 0);
 		}
 	}
-
-	public Timestamp(long lengthInSeconds) {
-		hours = (int) (lengthInSeconds / 3600);
-		minutes = (int) (lengthInSeconds % 3600 / 60);
-		seconds = (int) (lengthInSeconds % 60);
+	
+	/**
+	 * Construct a new {@code Timestamp}
+	 * @param position the position in seconds
+	 */
+	public Timestamp(long position) {
+		hours = (int) (position / 3600);
+		minutes = (int) (position % 3600 / 60);
+		seconds = (int) (position % 60);
 	}
 	
+	/**
+	 * Create a {@code Timestamp}
+	 * @param hours amount of hours
+	 * @param minutes amount of minutes
+	 * @param seconds amount of seconds
+	 */
 	public Timestamp(int hours, int minutes, int seconds) {
 		this.hours = hours;
 		this.minutes = minutes;
 		this.seconds = seconds;
 	}
 	
+	/**
+	 * @return the total length from begin to this {@code Timestamp}
+	 */
 	public long getTotalLength() {
 		return (long) hours * 3600 + minutes * 60 + seconds;
 	}
@@ -66,18 +84,42 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
 		return diff;
 	}
 	
+	// SOME ARITHMETIC FOR TIMESTAMPS
+	
+	/**
+	 * Subtract one {@code Timestamp} from another
+	 * @param a
+	 * @param b
+	 * @return subtraction of b from a
+	 */
 	public static Timestamp subtract(Timestamp a, Timestamp b) {
 		return new Timestamp(a.getTotalLength() - b.getTotalLength());
 	}
 	
+	/**
+	 * Add one {@code Timestamp} to another
+	 * @param a
+	 * @param b
+	 * @return addition of a and b
+	 */
 	public static Timestamp add(Timestamp a, Timestamp b) {
 		return new Timestamp(a.getTotalLength() + b.getTotalLength());
 	}
-
+	
+	/**
+	 * Subtract {@code Timestamp} from this {@code Timestamp}
+	 * @param t
+	 * @return subtraction of t from this
+	 */
 	public Timestamp subtract(Timestamp t) {
 		return subtract(this, t);
 	}
 	
+	/**
+	 * Add {@code Timestamp} to this {@code Timestamp}
+	 * @param t
+	 * @return addition of this and t
+	 */
 	public Timestamp add(Timestamp t) {
 		return add(this, t);
 	}

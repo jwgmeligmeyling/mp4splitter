@@ -1,5 +1,13 @@
 package nl.sslleiden.util;
 
+/**
+ * An simple implementation of {@code Proposal} that defines noop
+ * behavior for the decline, cancel and close methods.
+ * 
+ * @author Jan-Willem Gmelig Meyling
+ * 
+ * @param <T> argument type
+ */
 public abstract class AbstractProposal<T> implements Proposal<T> {
 
 	@Override
