@@ -2,8 +2,6 @@ package nl.youngmediaexperts.data;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,18 +14,24 @@ public class Timestamp implements Comparable<Timestamp>, Serializable {
 
 	private final int hours, minutes, seconds;
 	
-	private final static Pattern pattern = Pattern.compile("^(\\d{2}):(\\d{2}):(\\d{2})$");	
-	
 	public Timestamp(String string) throws ParseException {
-		synchronized(pattern) {
-			Matcher matcher = pattern.matcher(string);
-			if(matcher.matches()) {
-				hours = Integer.parseInt(matcher.group(1));
-				minutes = Integer.parseInt(matcher.group(2));
-				seconds = Integer.parseInt(matcher.group(3));
+		assert string != null;
+		String[] parts =
+				string.split(":");
+		try {
+			if(parts.length == 2) {
+				hours = 0;
+				minutes = Integer.parseInt(parts[0]);
+				seconds = Integer.parseInt(parts[1]);
+			} else if (parts.length == 3 ){
+				hours = Integer.parseInt(parts[0]);
+				minutes = Integer.parseInt(parts[1]);
+				seconds = Integer.parseInt(parts[2]);
 			} else {
 				throw new ParseException("Invalid input for Timestamp", 0);
 			}
+		} catch (NumberFormatException e) {
+			throw new ParseException(e.getMessage(), 0);
 		}
 	}
 

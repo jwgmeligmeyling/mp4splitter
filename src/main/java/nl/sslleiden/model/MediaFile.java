@@ -249,10 +249,10 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	
 	private Timestamp getClostestEndpoint(Marker inpoint) {
 		int size = markers.size(),
-			lastIndex = size - 1,
-			index = markers.indexOf(inpoint);
+			index = markers.indexOf(inpoint),
+			lastIndex = index + 1;
 		assert index != -1;
-		if(lastIndex > index ) {
+		if(lastIndex < size) {
 			return markers.get(lastIndex).getTimestamp();
 		} else {
 			return duration;

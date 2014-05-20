@@ -9,10 +9,8 @@ import java.nio.file.FileAlreadyExistsException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +31,7 @@ public final class Split {
 
 	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 	
-	public static Future<File> split(final MediaFile mediaFile, final FutureCallback<File> callback) throws FileNotFoundException, IOException {
+	public static void split(final MediaFile mediaFile, final FutureCallback<File> callback) throws FileNotFoundException, IOException {
 		final DataSource source = new FileDataSourceImpl(mediaFile.getFile());
 		final Movie movie = MovieCreator.build(source);
 		List<Track> tracks = movie.getTracks();
@@ -68,7 +66,7 @@ public final class Split {
 
 		for (Track track : tracks) {
 			double currentTime = 0, lastTime = 0;
-			long currentSample = 0, startSample = -1, endSample = -1;
+			long currentSample = 0, startSample = 0, endSample = 0;
 
 			for (int i = 0; i < track.getSampleDurations().length; i++) {
 				long delta = track.getSampleDurations()[i];
@@ -91,33 +89,37 @@ public final class Split {
 		}
 		
 
-		return executor.submit(new Callable<File>() {
+		executor.submit(new Runnable() {
+			
 			
 			@Override
-			public File call() throws FileNotFoundException, IOException {
-				log.info("Start converting file {}", mediaFile);
-		        Container out = new DefaultMp4Builder().build(movie);
-				String name = String.format("%s-%s.mp4", mediaFile.getFileNameWithoutExtension(), System.currentTimeMillis());
-				File destination = new File(mediaFile.getFile().getParent(), name);
-				if(destination.exists())
-					throw new FileAlreadyExistsException(destination.toString() + " already exists!");
-				else
-					destination.createNewFile();
-				log.info("Done converting, now writing to file: {}", destination);
-				try(FileOutputStream fos = new FileOutputStream(destination);
-					FileChannel fc = fos.getChannel()) {
-					out.writeContainer(fc);
-				} catch (Exception exception) {
-					callback.onFailure(exception);
-					throw exception;
-				} finally {
-					// We close the source here because otherwise autoclosable
-					// closes it while it's still needed in the executor
-					source.close();
+			public void run() {
+				try {
+					log.info("Start converting file {}", mediaFile);
+			        
+					Container out = new DefaultMp4Builder().build(movie);
+					String name = String.format("%s-%s.mp4", mediaFile.getFileNameWithoutExtension(), System.currentTimeMillis());
+					File destination = new File(mediaFile.getFile().getParent(), name);
+					if(destination.exists())
+						throw new FileAlreadyExistsException(destination.toString() + " already exists!");
+					else
+						destination.createNewFile();
+					
+					log.info("Done converting, now writing to file: {}", destination);
+					try(FileOutputStream fos = new FileOutputStream(destination);
+						FileChannel fc = fos.getChannel()) {
+						out.writeContainer(fc);
+					} finally {
+						// We close the source here because otherwise autoclosable
+						// closes it while it's still needed in the executor
+						source.close();
+					}
+					
+					log.info("Done writing file: {}", destination);
+					callback.onSuccess(destination);
+				} catch (Exception e) {
+					callback.onFailure(e);
 				}
-				log.info("Done writing file: {}", destination);
-				callback.onSuccess(destination);
-				return destination;
 			}
 			
 		});

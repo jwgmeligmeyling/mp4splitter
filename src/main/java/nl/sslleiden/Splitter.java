@@ -217,9 +217,9 @@ public class Splitter extends JPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				final String infoMsg = "Thank you for using Examencursus MRC-1 Videosplitter®\n"
+				final String infoMsg = "Thank you for using Examencursus MRC-1 Videosplitter \u00ae\n"
 						+ "This software has been made by Jan-Willem Gmelig Meyling\n"
-						+ "© 2014 by Stichting Studiebegeleiding Leiden";
+						+ "\u00a9 2014 by Stichting Studiebegeleiding Leiden";
 				JOptionPane.showMessageDialog(null, infoMsg, "Info", JOptionPane.INFORMATION_MESSAGE);
 			}
 			
@@ -503,6 +503,8 @@ public class Splitter extends JPanel {
 							MediaFile mediaFile = getSelectedMediaFile();
 							if (mediaFile != null) {
 								model.removeMediaFile(mediaFile);
+								table.updateUI();
+								table.changeSelection(0, 0, false, false);
 								table.updateUI();
 							}
 						}
