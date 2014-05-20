@@ -218,7 +218,7 @@ public class CourseModel implements Serializable {
 	 * @throws IOException
 	 */
 	public File saveToFile() throws IOException {
-		File file = new File(rootFolder.getPath() + "/output.txt");
+		File file = new File(rootFolder, "output.txt");
 		if(!file.exists())
 			file.createNewFile();
 		saveToFile(file);
