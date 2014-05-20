@@ -1,6 +1,8 @@
 package nl.youngmediaexperts.data;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -62,4 +64,16 @@ public class Marker implements Comparable<Marker>, Serializable {
 	public Marker add(Timestamp t) {
 		return new Marker(timestamp.add(t), description);
 	}
+	
+	/**
+	 * Write this {@code Marker} to a {@code Writer}
+	 * @param writer
+	 * @throws IOException
+	 */
+	public void write(Writer writer) throws IOException {
+		final String EOL = System.lineSeparator();
+		writer.append('\t').append(timestamp.toString()).append(' ')
+			.append(description).append(EOL);
+	}
+	
 }

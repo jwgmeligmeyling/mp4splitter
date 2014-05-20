@@ -21,7 +21,7 @@
 			</video>
 		</div>
 		<div id='omschrijving' style='float: none;'>
-			${model.getCursus().getOmschrijving()} ${model.getJaartal()} - Periode ${model.getPeriode()}<br \>
+			${model.getCursus().getOmschrijving()} ${model.getJaartal()?c} - Periode ${model.getPeriode()}<br \>
 			${model.getNiveau().getOmschrijving()} ${model.getVak().getNaam()}<br \>
 			${model.getDocent()}
 		</div>

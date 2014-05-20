@@ -3,6 +3,7 @@ package nl.sslleiden.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -42,6 +43,7 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	private File file;
 	private int camera;
 	private int index;
+	private String summary;
 	
 	@Setter(AccessLevel.NONE)
 	private Date creation;
@@ -99,8 +101,8 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		String
 			origName = scanner.next(),
 			convName = scanner.next();
-		/*	title = */ scanner.next().concat(scanner.nextLine());
 		
+		this.summary = scanner.next().concat(scanner.nextLine());
 		this.file = new File(model.getRootFolder(), convName);
 		this.inpoint = new Timestamp(0,0,0);
 		this.markers = Lists.newArrayList();
@@ -123,6 +125,13 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 			this.outpoint = this.duration = new Duration(scanner.next());
 		} else {
 			throw new ParseException("Expected duration stamp", 0);
+		}
+		
+		if(!markers.isEmpty() && markers.get(0).getDescription().equals(summary)) {
+			String[] split = this.summary.split(" - ", 2);
+			if(split.length == 2) {
+				this.summary = split[0];
+			}
 		}
 		
 		log.info("Initialized file {}", this);
@@ -157,7 +166,19 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	}
 	
 	public String getSummary() {
-		return markers.isEmpty() ? "" : markers.get(0).getDescription();
+		String summary = this.summary;
+		if(summary == null) {
+			if(markers.isEmpty()) {
+				summary = "";
+			} else {
+				summary = markers.get(0).getDescription();
+				String[] split = summary.split(" - ", 2);
+				if(split.length == 2) {
+					summary = split[0];
+				}
+			}
+		}
+		return summary;
 	}
 	
 	public String getPath() {
@@ -259,13 +280,39 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		}
 	}
 	
+	/**
+	 * @return true if the inpoint is not the begin of the file or
+	 * the outpoint is not equal to the duration of this {@code MediaFile}
+	 */
 	public boolean isTrimmable() {
 		return !(this.getInpoint().equals(new Timestamp(0,0,0)) &&
 				this.getOutpoint().equals(this.getDuration()));
 	}
 	
+	/**
+	 * @return the {@code Date} at which this {@code MediaFile} is created
+	 */
 	public Date getCreation() {
 		return creation == null ? new Date(file.lastModified()) : creation;
+	}
+	
+	/**
+	 * Write this {@code MediaFile} to a {@code Writer}
+	 * @param writer
+	 * @throws IOException
+	 */
+	public void write(Writer writer) throws IOException {
+		final String EOL = System.lineSeparator();
+		writer.append(this.getFileName()).append(EOL);
+		writer.append(this.getFileName()).append(EOL);
+		writer.append(this.getSummary()).append(EOL);
+		
+		for(Marker marker : this.getMarkers()) {
+			marker.write(writer);
+		}
+		
+		writer.append('\t').append(this.duration.toString()).append(EOL);
+		writer.append(EOL);
 	}
 	
 	/**

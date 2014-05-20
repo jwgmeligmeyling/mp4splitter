@@ -30,7 +30,6 @@ import freemarker.template.TemplateException;
 import nl.sslleiden.util.AbstractProposal;
 import nl.sslleiden.util.Callback;
 import nl.sslleiden.util.Proposal;
-import nl.youngmediaexperts.data.Marker;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -233,30 +232,29 @@ public class CourseModel implements Serializable {
 	 */
 	public void saveToFile(File file) throws IOException {
 		try(FileWriter writer = new FileWriter(file)) {	
-			final String EOL = System.lineSeparator();
-			writer.append("Trainingsvideo ").append(vak.getNaam()).append(EOL);
-			writer.append(cursus.getOmschrijving()).append(' ').append(Integer.toString(jaartal))
-				.append(" - periode ").append(Integer.toString(periode)).append(EOL);
-			writer.append(niveau.getOmschrijving()).append(' ').append(vak.getNaam()).append(EOL);
-			writer.append(docent).append(EOL);
-			writer.append(EOL);
-			
-			for(MediaFile part : files) {
-				writer.append(part.getFileName()).append(EOL);
-				writer.append(part.getFileName()).append(EOL);
-				writer.append(part.getMarkers().get(0).getDescription()).append(EOL);
-				
-				for(Marker marker : part.getMarkers()) {
-					writer.append('\t').append(marker.getTimestamp().toString()).append(' ')
-						.append(marker.getDescription()).append(EOL);
-				}
-				
-				writer.append('\t').append(part.getDuration().toString()).append(EOL);
-				writer.append(EOL);
-			}
-			
-			writer.flush();
+			write(writer);
 		}
+	}
+	
+	/**
+	 * Write this {@code CourseModel} to a {@code Writer}
+	 * @param writer
+	 * @throws IOException
+	 */
+	public void write(Writer writer) throws IOException {
+		final String EOL = System.lineSeparator();
+		writer.append("Trainingsvideo ").append(vak.getNaam()).append(EOL);
+		writer.append(cursus.getOmschrijving()).append(' ').append(Integer.toString(jaartal))
+			.append(" - periode ").append(Integer.toString(periode)).append(EOL);
+		writer.append(niveau.getOmschrijving()).append(' ').append(vak.getNaam()).append(EOL);
+		writer.append(docent).append(EOL);
+		writer.append(EOL);
+		
+		for(MediaFile part : files) {
+			part.write(writer);
+		}
+		
+		writer.flush();
 	}
 	
 	/**
