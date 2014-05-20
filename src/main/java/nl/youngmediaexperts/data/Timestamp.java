@@ -10,6 +10,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(of={"hours", "minutes", "seconds"})
 public class Timestamp implements Comparable<Timestamp>, Serializable {
 	
+	//Since timestamps are immutable, we can use a static final timestamp for the start values
+	public final static Timestamp START = new Timestamp(0,0,0);
+	
 	private static final long serialVersionUID = -3087782637605354300L;
 
 	private final int hours, minutes, seconds;

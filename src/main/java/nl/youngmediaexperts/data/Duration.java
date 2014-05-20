@@ -17,6 +17,8 @@ public class Duration extends Timestamp implements Serializable {
 	
 	private static final long serialVersionUID = -6702460877507781706L;
 	
+	public final static Duration EMPTY = new Duration(Timestamp.START);
+	
 	/**
 	 * Create a new {@code Duration}
 	 * @param duration duration in frames

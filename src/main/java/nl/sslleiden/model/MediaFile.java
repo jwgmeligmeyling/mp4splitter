@@ -51,9 +51,9 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	@Setter(AccessLevel.NONE)
 	private List<Marker> markers = Lists.newArrayList();
 	
-	private Duration duration;
+	private Duration duration = Duration.EMPTY;
 	
-	private Timestamp inpoint, outpoint;
+	private Timestamp inpoint = Timestamp.START, outpoint = Timestamp.START;
 	
 	/**
 	 * No args constructor for serialization
@@ -68,7 +68,6 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	 */
 	public MediaFile(File file) throws IOException, ParseException {
 		this.file = file;
-		this.inpoint = new Timestamp(0,0,0);
 		
 		try(IsoFile isoFile = new IsoFile(new FileDataSourceImpl(file))) {
 			// Parse the isoFile to get the bitrate and duration for the file
@@ -83,7 +82,7 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		String name = file.getName();
 		parseFileName(name);
 		
-		markers.add(new Marker(new Timestamp(0,0,0) ,"Start"));
+		markers.add(new Marker(Timestamp.START,"Start"));
 		log.info("Initialized file {}", this);
 	}
 	
@@ -104,7 +103,6 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 		
 		this.summary = scanner.next().concat(scanner.nextLine());
 		this.file = new File(model.getRootFolder(), convName);
-		this.inpoint = new Timestamp(0,0,0);
 		this.markers = Lists.newArrayList();
 		parseFileName(origName);
 		
@@ -285,7 +283,7 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 	 * the outpoint is not equal to the duration of this {@code MediaFile}
 	 */
 	public boolean isTrimmable() {
-		return !(this.getInpoint().equals(new Timestamp(0,0,0)) &&
+		return !(this.getInpoint().equals(Timestamp.START) &&
 				this.getOutpoint().equals(this.getDuration()));
 	}
 	
@@ -345,7 +343,7 @@ public class MediaFile implements Comparable<MediaFile>, Serializable {
 					// Update in and out points
 					Timestamp outpoint = MediaFile.this.getOutpoint().subtract(inpoint); 
 					MediaFile.this.setOutpoint(outpoint);
-					MediaFile.this.setInpoint(new Timestamp(0,0,0));
+					MediaFile.this.setInpoint(Timestamp.START);
 					MediaFile.this.setDuration(new Duration(outpoint));
 					
 					// Run the callback

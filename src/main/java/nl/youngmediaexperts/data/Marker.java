@@ -23,13 +23,6 @@ public class Marker implements Comparable<Marker>, Serializable {
 	private String description;
 	
 	/**
-	 * Construct an empty marker
-	 */
-	public Marker() {
-		this(new Timestamp(0,0,0), "");
-	}
-	
-	/**
 	 * Construct a new Marker
 	 * @param hours
 	 * @param minutes
