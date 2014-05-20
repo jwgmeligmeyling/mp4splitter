@@ -85,6 +85,7 @@ public class Splitter extends JPanel {
 	}
 	
 	private final List<MediaFile> assets;
+	private final JTable fileTable, markerTable;
 
 	public Splitter(final CourseModel model) throws IOException {
 		super(new BorderLayout());
@@ -228,7 +229,7 @@ public class Splitter extends JPanel {
 		menuBar.add(menu);
 		this.add(menuBar, BorderLayout.NORTH);
 		
-    	final JTable table = new JTable(new CustomTableModel(new Column[] {
+    	fileTable = new JTable(new CustomTableModel(new Column[] {
     			
     	new AbstractColumn(properties.getProperty("NAME")) {
 
@@ -300,14 +301,14 @@ public class Splitter extends JPanel {
 				return assets.size();
 			}
 			
-    	}),
+    	});
 		
-		table2 = new JTable(new AbstractTableModel() {
+		markerTable = new JTable(new AbstractTableModel() {
     		
 			private static final long serialVersionUID = 7836885252821248967L;
 
 			private MediaFile getMediaFile() {
-				int selectedRow = table.getSelectedRow();
+				int selectedRow = fileTable.getSelectedRow();
 				if(selectedRow != -1 && model.getFiles().size() > 0) {
 					return assets.get(selectedRow);
 				}
@@ -389,32 +390,32 @@ public class Splitter extends JPanel {
 			@Override
 			public void setValueAt(Object aValue, int row, int column) {
 				super.setValueAt(aValue, row, column);
-				this.updateUI();
+				updateMarkerTable();
 			}
 			
     	};
     	
-        table.setPreferredScrollableViewportSize(new Dimension(PREFERRED_WIDTH, 300));
-        table.setFillsViewportHeight(true);
-        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane scrollPane = new JScrollPane(table);
+        fileTable.setPreferredScrollableViewportSize(new Dimension(PREFERRED_WIDTH, 300));
+        fileTable.setFillsViewportHeight(true);
+        fileTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(fileTable);
         
-        table2.setPreferredScrollableViewportSize(new Dimension(PREFERRED_WIDTH, 70));
-        table2.setFillsViewportHeight(true);
-        JScrollPane scrollPane2 = new JScrollPane(table2);
+        markerTable.setPreferredScrollableViewportSize(new Dimension(PREFERRED_WIDTH, 70));
+        markerTable.setFillsViewportHeight(true);
+        JScrollPane scrollPane2 = new JScrollPane(markerTable);
         
         JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, scrollPane, scrollPane2);
         
-    	table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+    	fileTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				table2.updateUI();
+				updateMarkerTable();
 			}
     		
     	});
     	
-    	table.addMouseListener(new MouseAdapter() {
+    	fileTable.addMouseListener(new MouseAdapter() {
 
     		@Override
     		public void mouseClicked(MouseEvent e) {
@@ -423,7 +424,7 @@ public class Splitter extends JPanel {
     		}
     		
     		public MediaFile getSelectedMediaFile() {
-				int selectedRow = table.getSelectedRow();
+				int selectedRow = fileTable.getSelectedRow();
 				if(selectedRow != -1) {
 					return assets.get(selectedRow);
 				}
@@ -451,8 +452,8 @@ public class Splitter extends JPanel {
     			if(SwingUtilities.isRightMouseButton(e)) {
     				// Select the correct row when right click in table
     				Point point = e.getPoint();
-    				int rowIndex = table.rowAtPoint(point);
-    				table.changeSelection(rowIndex, 0, false, false);
+    				int rowIndex = fileTable.rowAtPoint(point);
+    				fileTable.changeSelection(rowIndex, 0, false, false);
     			}
     	        if (e.isPopupTrigger())
     	            doPop(e);
@@ -484,7 +485,7 @@ public class Splitter extends JPanel {
 							if (chooser.showOpenDialog(Splitter.this) == JFileChooser.APPROVE_OPTION) {
 								try {
 									model.addMediaFile(new MediaFile(chooser.getSelectedFile()));
-									table.updateUI();
+									updateFileTable();
 								} catch (Exception exception) {
 									JOptionPane.showMessageDialog(null, exception.getMessage());
 									log.error(exception.getMessage(), exception);
@@ -503,9 +504,8 @@ public class Splitter extends JPanel {
 							MediaFile mediaFile = getSelectedMediaFile();
 							if (mediaFile != null) {
 								model.removeMediaFile(mediaFile);
-								table.updateUI();
-								table.changeSelection(0, 0, false, false);
-								table.updateUI();
+								fileTable.changeSelection(0, 0, false, false);
+								updateFileTable();
 							}
 						}
     	        		
@@ -520,7 +520,7 @@ public class Splitter extends JPanel {
     	        			MediaFile mediaFile = getSelectedMediaFile();
     	        			model.addMediaFile(mediaFile.duplicate());
     	        			
-    	        			table.updateUI();
+    	        			updateFileTable();
 						}
     	        		
     	        	}),
@@ -538,8 +538,8 @@ public class Splitter extends JPanel {
 
 									@Override
 									public void onSuccess(MediaFile result) {
-										table.updateUI();
-										table2.updateUI();
+										updateFileTable();
+										updateMarkerTable();
 									}
 
 									@Override
@@ -555,7 +555,7 @@ public class Splitter extends JPanel {
     	        	});
     	    
     	        	
-    	        	if(table.getSelectedRow() == -1) {
+    	        	if(fileTable.getSelectedRow() == -1) {
     	        		optionRemove.setEnabled(false);
     	        		optionDuplicate.setEnabled(false);
     	        		optionRenderSubClip.setEnabled(false);
@@ -574,15 +574,15 @@ public class Splitter extends JPanel {
     		
     	});
     	
-    	table2.addMouseListener(new MouseAdapter() {
+    	markerTable.addMouseListener(new MouseAdapter() {
     		
     		@Override
     	    public void mousePressed(MouseEvent e){
     			if(SwingUtilities.isRightMouseButton(e)) {
     				// Select the correct row when right click in table
     				Point point = e.getPoint();
-    				int rowIndex = table2.rowAtPoint(point);
-    				table2.changeSelection(rowIndex, 0, false, e.isShiftDown());
+    				int rowIndex = markerTable.rowAtPoint(point);
+    				markerTable.changeSelection(rowIndex, 0, false, e.isShiftDown());
     			}
     	        if (e.isPopupTrigger())
     	            doPop(e);
@@ -601,7 +601,7 @@ public class Splitter extends JPanel {
 					
 					
 					public MediaFile getSelectedMediaFile() {
-						int selectedRow = table.getSelectedRow();
+						int selectedRow = fileTable.getSelectedRow();
 						if(selectedRow != -1) {
 							return assets.get(selectedRow);
 						}
@@ -609,11 +609,11 @@ public class Splitter extends JPanel {
 					}
 					
 					public Marker[] getSelectedMarkers(MediaFile mediaFile) {
-						int count = table2.getSelectedRowCount();
+						int count = markerTable.getSelectedRowCount();
 						Marker[] result = new Marker[count];
 						
 						if(count > 0) {
-							int[] rows = table2.getSelectedRows();
+							int[] rows = markerTable.getSelectedRows();
 							List<Marker> markers = mediaFile.getMarkers();
 							
 							for(int i = 0, l = rows.length; i < l; i++)
@@ -630,11 +630,11 @@ public class Splitter extends JPanel {
 
 						@Override
 						public void actionPerformed(ActionEvent e) {
-							int selectedRow = table.getSelectedRow();
+							int selectedRow = fileTable.getSelectedRow();
 							if(selectedRow != -1 ) {
 								MediaFile mediaFile = assets.get(selectedRow);
 								newMarkerFor(mediaFile);
-								table2.updateUI();
+								updateMarkerTable();
 							}
 						}
 						
@@ -667,7 +667,7 @@ public class Splitter extends JPanel {
 							if(mediaFile != null) {
 								List<Marker> toBeRemoved = Arrays.asList(getSelectedMarkers(mediaFile));
 								mediaFile.getMarkers().removeAll(toBeRemoved);
-								table2.updateUI();
+								updateMarkerTable();
 							}
 						}
 						
@@ -685,13 +685,13 @@ public class Splitter extends JPanel {
 								if(markers.length > 0) {
 									MediaFile newFile = mediaFile.createSubClip(markers);
 									model.addMediaFile(newFile);
-									table.updateUI();
+									updateFileTable();
 								}
 							}
 						}
     	        	});
     	        	
-    	        	if(table2.getSelectedRow() == -1) {
+    	        	if(markerTable.getSelectedRow() == -1) {
     	        		optionRemove.setEnabled(false);
     	        		optionMakeSubClip.setEnabled(false);
     	        	}
@@ -806,14 +806,36 @@ public class Splitter extends JPanel {
         	this.add(additionalAttributes, BorderLayout.SOUTH);
         }
         
-        table.getColumnModel().getColumn(5).setPreferredWidth(15);
-        table.getColumnModel().getColumn(6).setPreferredWidth(15);
+        fileTable.getColumnModel().getColumn(5).setPreferredWidth(15);
+        fileTable.getColumnModel().getColumn(6).setPreferredWidth(15);
         
         if(model.getFiles().size() > 0) {
-        	table.changeSelection(0, 0, false, false);
-        	table2.changeSelection(0, 0, false, false);
+        	fileTable.changeSelection(0, 0, false, false);
+        	markerTable.changeSelection(0, 0, false, false);
         }
 
 	}
+	
+	/**
+	 * Update the File table
+	 */
+    public void updateFileTable() {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				fileTable.updateUI();
+			}
+		});
+    }
+    
+    /**
+     * Update the Marker table
+     */
+    public void updateMarkerTable() {
+    	SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				markerTable.updateUI();
+			}
+		});
+    }
 
 }
