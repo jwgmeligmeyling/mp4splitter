@@ -17,6 +17,7 @@ import java.util.Properties;
 
 import javax.swing.AbstractAction;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -67,29 +68,52 @@ public class Splitter extends JPanel {
 	
 	private static JFrame frame;
 	
+	/**
+	 * Fetch the {@code Properties} from the Resource folder, open a new
+	 * {@code Splitter} panel
+	 * 
+	 * @param args
+	 * @throws IOException
+	 * @throws ParseException
+	 */
 	public static void main(String[] args) throws IOException, ParseException {
 		properties = new Properties();
 		properties.load(Splitter.class.getResourceAsStream("/properties.properties"));
-		frame = createFrame(new Splitter(new CourseModel(new File("."))));
+		createFrame(new Splitter(new CourseModel(new File("."))));
 	}
 	
-	public static JFrame createFrame(Splitter splitter) {
-		JFrame frame = new JFrame(properties.getProperty("FORM_HEADER"));
+	/**
+	 * Create a new {@code JFrame}, hide the old one
+	 * @param splitter
+	 *            The {@code Splitter} instance that forms the
+	 *            {@code ContentPane} for this {@code JFrame}
+	 */
+	private static void createFrame(Splitter splitter) {
+		frame = new JFrame(String.format("%s - %s",
+				properties.getProperty("FORM_HEADER"),
+				splitter.model.getRootFolder().getPath()));
 		splitter.setOpaque(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setContentPane(splitter);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.pack();
 		frame.setVisible(true);
 		frame.setLocationRelativeTo(null);
-		return frame;
 	}
 	
+	private final CourseModel model;
 	private final List<MediaFile> assets;
 	private final JTable fileTable, markerTable;
-
+	private final MarkerTableModel markerTableModel = new MarkerTableModel();
+	
+	/**
+	 * Construct a new {@code Splitter}
+	 * @param model The {@code CourseModel} for this {@code Splitter}
+	 * @throws IOException
+	 */
 	public Splitter(final CourseModel model) throws IOException {
 		super(new BorderLayout());
 		this.assets = model.getFiles();
+		this.model = model;
 		
 		final JMenuBar menuBar = new JMenuBar();
 		JMenu menu = new JMenu(properties.getProperty("FILE_TXT"));
@@ -108,7 +132,6 @@ public class Splitter extends JPanel {
 				if (chooser.showOpenDialog(Splitter.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						createFrame(new Splitter(new CourseModel(chooser.getSelectedFile())));
-						frame.setVisible(false);
 					} catch (Exception exception) {
 						JOptionPane.showMessageDialog(null, properties.getProperty("FAILED_TO_OPEN"));
 						log.error(exception.getMessage(), exception);
@@ -134,7 +157,6 @@ public class Splitter extends JPanel {
 				if (chooser.showOpenDialog(Splitter.this) == JFileChooser.APPROVE_OPTION) {
 					try {
 						createFrame(new Splitter(new CourseModel(chooser.getSelectedFile())));
-						frame.setVisible(false);
 					} catch (Exception exception) {
 						JOptionPane.showMessageDialog(null, exception.getMessage());
 						log.error(exception.getMessage(), exception);
@@ -303,87 +325,7 @@ public class Splitter extends JPanel {
 			
     	});
 		
-		markerTable = new JTable(new AbstractTableModel() {
-    		
-			private static final long serialVersionUID = 7836885252821248967L;
-
-			private MediaFile getMediaFile() {
-				int selectedRow = fileTable.getSelectedRow();
-				if(selectedRow != -1 && model.getFiles().size() > 0) {
-					return assets.get(selectedRow);
-				}
-				return null;
-			}
-			
-			final String[] columns = { properties.getProperty("TIMECODE"), properties.getProperty("DESCRIPTION") };
-			
-			@Override
-			public int getRowCount() {
-				MediaFile mediaFile = getMediaFile();
-				if(mediaFile != null ) {
-					return mediaFile.getMarkers().size();
-				}
-				return 0;
-			}
-
-			@Override
-			public int getColumnCount() {
-				return columns.length;
-			}
-
-			@Override
-			public String getColumnName(int columnIndex) {
-				return columns[columnIndex];
-			}
-
-			@Override
-			public Class<?> getColumnClass(int columnIndex) {
-				return String.class;
-			}
-
-			@Override
-			public boolean isCellEditable(int rowIndex, int columnIndex) {
-				return true;
-			}
-
-			@Override
-			public Object getValueAt(int rowIndex, int columnIndex) {
-				MediaFile mediaFile = getMediaFile();
-				if(mediaFile != null ) {
-					Marker marker = mediaFile.getMarkers().get(rowIndex);
-					switch(columnIndex) {
-						case 0:
-							return marker.getTimestamp().toString();
-						case 1:
-							return marker.getDescription();
-					}
-				}
-				return null;
-				
-			}
-
-			@Override
-			public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-				MediaFile mediaFile = getMediaFile();
-				if(mediaFile == null ) return;
-				Marker marker = mediaFile.getMarkers().get(rowIndex);
-				
-				switch(columnIndex) {
-				case 0:
-					try {
-						marker.setTimestamp(new Timestamp(aValue.toString()));
-						Collections.sort(mediaFile.getMarkers());
-					} catch (ParseException exception) {
-						log.info(exception.getMessage(), exception);
-					}
-					break;
-				case 1:
-					marker.setDescription(aValue.toString());
-					break;
-				}
-			}
-			
-		}) {
+		markerTable = new JTable(markerTableModel) {
 
 			private static final long serialVersionUID = 476559071645295842L;
 
@@ -410,7 +352,15 @@ public class Splitter extends JPanel {
 
 			@Override
 			public void valueChanged(ListSelectionEvent e) {
-				updateMarkerTable();
+				if(markerTable.isEditing()) {
+					markerTable.getCellEditor().stopCellEditing();
+				}
+				
+				int selectedRow = fileTable.getSelectedRow();
+				if(selectedRow != -1) {
+					MediaFile mediaFile = assets.get(selectedRow);
+					markerTableModel.setMediaFile(mediaFile);
+				}
 			}
     		
     	});
@@ -837,5 +787,100 @@ public class Splitter extends JPanel {
 			}
 		});
 	}
+	
+	/**
+	 * The Marker model should change when another {@code MediaFile} is
+	 * selected. The Marker model is used for viewing and editing the Markers
+	 * for a MediaFile.
+	 * 
+	 * @author Jan-Willem Gmelig Meyling
+	 * 
+	 */
+	class MarkerTableModel extends AbstractTableModel implements TableModel {
+		
+		private static final long serialVersionUID = 7836885252821248967L;
 
+		private final String[] columns = {
+			properties.getProperty("TIMECODE"),
+			properties.getProperty("DESCRIPTION")
+		};
+		
+		private MediaFile mediaFile;
+		
+		/**
+		 * Change the selected {@code MediaFile}
+		 * @param mediaFile
+		 */
+		public void setMediaFile(MediaFile mediaFile) {
+			if(this.mediaFile != mediaFile) {
+				this.mediaFile = mediaFile;
+				updateMarkerTable();
+			}
+		}
+		
+		@Override
+		public int getRowCount() {
+			if(mediaFile != null ) {
+				return mediaFile.getMarkers().size();
+			}
+			return 0;
+		}
+
+		@Override
+		public int getColumnCount() {
+			return columns.length;
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+			return columns[columnIndex];
+		}
+
+		@Override
+		public Class<?> getColumnClass(int columnIndex) {
+			return String.class;
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			return true;
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+			if(mediaFile != null ) {
+				Marker marker = mediaFile.getMarkers().get(rowIndex);
+				switch(columnIndex) {
+					case 0:
+						return marker.getTimestamp().toString();
+					case 1:
+						return marker.getDescription();
+				}
+			}
+			return null;
+			
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+			if(mediaFile == null ) return;
+			Marker marker = mediaFile.getMarkers().get(rowIndex);
+			
+			switch(columnIndex) {
+			case 0:
+				try {
+					marker.setTimestamp(new Timestamp(aValue.toString()));
+					Collections.sort(mediaFile.getMarkers());
+				} catch (ParseException exception) {
+					log.info(exception.getMessage(), exception);
+				}
+				break;
+			case 1:
+				marker.setDescription(aValue.toString());
+				break;
+			}
+		}
+		
+	}
+	
 }

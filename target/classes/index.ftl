@@ -32,7 +32,7 @@
 				</li>
 				<ol class='subonderdelen' style='float: none'>
 					<#list file.markers as marker>
-						<li class='subonderdeel' id='${marker.getTimestamp().getTotalLength()}'>
+						<li class='subonderdeel' id='${marker.getTimestamp().getTotalLength()?c}'>
 							<span style='float: right;'>${marker.getTimestamp().toString()} </span> ${marker.getDescription()}
 						</li>
 					</#list>
